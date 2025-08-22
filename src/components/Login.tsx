@@ -31,6 +31,7 @@ export const Login: React.FC = () => {
 
       if (response.success) {
         login(response);
+        navigate('/dashboard');
       } else {
         setError(response.message);
       }
