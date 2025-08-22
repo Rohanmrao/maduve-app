@@ -1,46 +1,156 @@
-# Getting Started with Create React App
+# Maduve Site Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React TypeScript frontend for the Christadelphian Matrimonial Website, built with Material-UI and TanStack Query.
+
+## Features
+
+- **User Authentication**: Login and signup for both users and admins
+- **User Dashboard**: Profile management, user search, and connection requests
+- **Admin Dashboard**: User approval system, request management, and analytics
+- **Profile Management**: Photo upload, profile editing, and status updates
+- **Connection System**: Send and manage connection requests between users
+- **Responsive Design**: Mobile-friendly interface using Material-UI
+- **Real-time Updates**: TanStack Query for efficient data fetching and caching
+
+## Technology Stack
+
+- **Framework**: React 18 with TypeScript
+- **UI Library**: Material-UI (MUI) v5
+- **State Management**: TanStack Query (React Query)
+- **Routing**: React Router v6
+- **HTTP Client**: Axios
+- **Build Tool**: Create React App
+
+## Prerequisites
+
+- Node.js 16+ 
+- npm or yarn
+- Backend API running on `http://localhost:5000`
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd maduve-app
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
+npm start
+```
+
+The application will be available at `http://localhost:3000`
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── Login.tsx       # User/Admin login
+│   ├── Signup.tsx      # User registration
+│   ├── Landing.tsx     # Landing page
+│   ├── UserDashboard.tsx # User dashboard
+│   ├── AdminDashboard.tsx # Admin dashboard
+│   ├── UserCard.tsx    # User profile card
+│   └── ProfileEdit.tsx # Profile editing dialog
+├── services/           # API services
+│   ├── api.ts         # Generic API service
+│   ├── userService.ts # User-related API calls
+│   ├── adminService.ts # Admin-related API calls
+│   ├── connectService.ts # Connection-related API calls
+│   └── index.ts       # Service exports
+├── hooks/              # Custom React hooks
+│   └── useAuth.ts     # Authentication hook
+├── types/              # TypeScript interfaces
+│   └── index.ts       # Type definitions
+└── App.tsx            # Main application component
+```
+
+## API Integration
+
+The frontend integrates with the ASP.NET Core backend API with the following endpoints:
+
+### User Management
+- `POST /api/users/signup` - User registration
+- `POST /api/login/user` - User login
+- `GET /api/users` - Get all users
+- `PUT /api/users/{id}` - Update user profile
+- `GET /api/users/{id}/photo` - Get profile photo
+
+### Admin Management
+- `POST /api/login/admin` - Admin login
+- `GET /api/admin/dashboard` - Admin dashboard stats
+- `GET /api/admin/requests/pending` - Get pending requests
+- `POST /api/admin/requests/{id}/approve` - Approve user request
+- `POST /api/admin/requests/{id}/reject` - Reject user request
+
+### Connection Requests
+- `POST /api/connect-requests/sender/{id}/send` - Send connection request
+- `POST /api/connect-requests/receiver/{id}/accept/{senderId}` - Accept request
+- `POST /api/connect-requests/receiver/{id}/reject/{senderId}` - Reject request
+- `GET /api/connect-requests/receiver/{id}/pending` - Get pending requests
+
+## Key Components
+
+### Authentication System
+- Dual login system for users and admins
+- Protected routes based on user type
+- Persistent authentication state
+
+### User Dashboard
+- Profile display with photo
+- User search and filtering
+- Connection request management
+- Profile editing capabilities
+
+### Admin Dashboard
+- User approval workflow
+- Request management interface
+- Dashboard statistics
+- User status management
+
+### Profile Management
+- Photo upload functionality
+- Profile information editing
+- Status updates
+- Image management
 
 ## Available Scripts
 
-In the project directory, you can run:
+- `npm start` - Start development server
+- `npm run build` - Build for production
+- `npm test` - Run tests
+- `npm run eject` - Eject from Create React App
 
-### `npm start`
+## Environment Configuration
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+The application expects the backend API to be running on `http://localhost:5000`. To change this, update the `API_BASE_URL` in `src/services/api.ts`.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Deployment
 
-### `npm test`
+1. Build the application:
+```bash
+npm run build
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. Deploy the `build` folder to your web server
 
-### `npm run build`
+3. Ensure the backend API is accessible from the deployed frontend
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Contributing
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## License
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+This project is licensed under the MIT License.
