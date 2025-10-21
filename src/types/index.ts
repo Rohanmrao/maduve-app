@@ -110,9 +110,7 @@ export interface AuthLevelResponse {
   authLevel: 'Admin' | 'User' | 'Unknown';
 }
 
-export interface DashboardResponse {
-  stats: string[];
-}
+export type DashboardResponse = string[];
 
 export interface ApiResponse<T> {
   data?: T;

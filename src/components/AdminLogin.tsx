@@ -7,11 +7,13 @@ import {
   Button,
   Typography,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Container
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { adminService } from '../services';
+import { Breadcrumbs } from './Breadcrumbs';
 
 export const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -45,14 +47,14 @@ export const AdminLogin: React.FC = () => {
   return (
     <Box
       sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
         minHeight: '100vh',
-        bgcolor: 'grey.100'
+        bgcolor: 'grey.100',
+        py: 4
       }}
     >
-      <Card sx={{ maxWidth: 400, width: '100%', mx: 2 }}>
+      <Container maxWidth="sm">
+        <Breadcrumbs items={[{ label: 'Admin Login' }]} />
+        <Card sx={{ width: '100%' }}>
         <CardContent>
           <Typography variant="h4" align="center" gutterBottom>
             Admin Login
@@ -117,6 +119,7 @@ export const AdminLogin: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
+      </Container>
     </Box>
   );
 };

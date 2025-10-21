@@ -14,11 +14,12 @@ import {
   DialogActions,
   TextField,
   Alert,
-  Grid
+  ImageList,
+  ImageListItem
 } from '@mui/material';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
-import { connectService } from '../services';
+import { connectService, userService } from '../services';
 import { User, UserStatusLabels } from '../types';
 
 interface UserCardProps {
@@ -33,6 +34,19 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onSelect, expanded = f
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const queryClient = useQueryClient();
+
+  const { data: connectionStatus } = useQuery({
+    queryKey: ['connection-status', currentUser?.id, user.id],
+    queryFn: () => connectService.checkConnectionStatus(currentUser?.id || '', user.id),
+    enabled: !!currentUser?.id && expanded
+  });
+
+  const { data: profileImages } = useQuery({
+    queryKey: ['profile-images', user.id],
+    queryFn: () => userService.getAllProfileImages(user.id),
+    enabled: expanded,
+    retry: false
+  });
 
   const sendConnectMutation = useMutation({
     mutationFn: () => connectService.sendConnectRequest(
@@ -65,12 +79,17 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onSelect, expanded = f
   };
 
   if (expanded) {
+    const allImages = [
+      user.hasProfilePhoto ? `http://localhost:5000/api/users/${user.id}/photo` : null,
+      ...(profileImages?.images.map(img => `http://localhost:5000${img.imageUrl}`) || [])
+    ].filter(Boolean) as string[];
+
     return (
       <Box>
         <Box display="flex" alignItems="center" mb={2}>
           <Avatar
             sx={{ width: 100, height: 100, mr: 3 }}
-            src={user.hasProfilePhoto ? `/api/users/${user.id}/photo` : undefined}
+            src={user.hasProfilePhoto ? `http://localhost:5000/api/users/${user.id}/photo` : undefined}
           >
             {user.fullName.charAt(0)}
           </Avatar>
@@ -84,6 +103,26 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onSelect, expanded = f
             />
           </Box>
         </Box>
+
+        {allImages.length > 0 && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Photos
+            </Typography>
+            <ImageList cols={3} gap={8}>
+              {allImages.map((imageUrl, index) => (
+                <ImageListItem key={index}>
+                  <img
+                    src={imageUrl}
+                    alt={`${user.fullName} - ${index + 1}`}
+                    loading="lazy"
+                    style={{ height: 200, objectFit: 'cover' }}
+                  />
+                </ImageListItem>
+              ))}
+            </ImageList>
+          </Box>
+        )}
 
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
           <Box>
@@ -137,14 +176,18 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onSelect, expanded = f
         </Box>
 
         <Box mt={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleConnectClick}
-            disabled={sendConnectMutation.isPending}
-          >
-            Send Connect Request
-          </Button>
+          {connectionStatus?.hasActiveConnection ? (
+            <Chip label="Already Connected" color="success" />
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleConnectClick}
+              disabled={sendConnectMutation.isPending}
+            >
+              Send Connect Request
+            </Button>
+          )}
         </Box>
       </Box>
     );
@@ -157,7 +200,7 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onSelect, expanded = f
           <Box display="flex" alignItems="center" mb={2}>
             <Avatar
               sx={{ width: 60, height: 60, mr: 2 }}
-              src={user.hasProfilePhoto ? `/api/users/${user.id}/photo` : undefined}
+              src={user.hasProfilePhoto ? `http://localhost:5000/api/users/${user.id}/photo` : undefined}
             >
               {user.fullName.charAt(0)}
             </Avatar>

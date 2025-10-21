@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline } from '@mui/material';
+import { CssBaseline, Box, CircularProgress } from '@mui/material';
 import { Login } from './components/Login';
 import { Signup } from './components/Signup';
 import { AdminLogin } from './components/AdminLogin';
@@ -10,7 +10,8 @@ import { AdminSignup } from './components/AdminSignup';
 import { UserDashboard } from './components/UserDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { Landing } from './components/Landing';
-import { useAuth } from './hooks/useAuth';
+import { ConnectionsPage } from './components/ConnectionsPage';
+import { AuthProvider, useAuth } from './hooks/useAuth';
 
 const theme = createTheme({
   palette: {
@@ -50,7 +51,22 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedUserType?: 'U
 };
 
 const AppRoutes: React.FC = () => {
-  const { isAuthenticated, userType } = useAuth();
+  const { isAuthenticated, userType, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh'
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Routes>
@@ -67,6 +83,14 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } 
       />
+      <Route 
+        path="/connections"
+        element={
+          <ProtectedRoute allowedUserType="User">
+            <ConnectionsPage />
+          </ProtectedRoute>
+        } 
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -77,9 +101,11 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
-          <AppRoutes />
-        </Router>
+        <AuthProvider>
+          <Router>
+            <AppRoutes />
+          </Router>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

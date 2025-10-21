@@ -25,17 +25,21 @@ import {
   AccountCircle,
   Logout,
   Edit,
-  PhotoCamera
+  PhotoCamera,
+  ConnectWithoutContact
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { userService, connectService } from '../services';
 import { User, UserStatusLabels } from '../types';
 import { ProfileEdit } from './ProfileEdit';
 import { UserCard } from './UserCard';
+import { Breadcrumbs } from './Breadcrumbs';
 
 export const UserDashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -100,6 +104,14 @@ export const UserDashboard: React.FC = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Maduve Site
           </Typography>
+          <Button
+            color="inherit"
+            startIcon={<ConnectWithoutContact />}
+            onClick={() => navigate('/connections')}
+            sx={{ mr: 2 }}
+          >
+            Connections
+          </Button>
           <IconButton
             color="inherit"
             onClick={handleMenuOpen}
@@ -124,13 +136,14 @@ export const UserDashboard: React.FC = () => {
       </AppBar>
 
       <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Breadcrumbs items={[{ label: 'Dashboard' }]} />
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 3 }}>
           <Card>
             <CardContent>
               <Box display="flex" alignItems="center" mb={2}>
                 <Avatar
                   sx={{ width: 80, height: 80, mr: 2 }}
-                  src={currentUser?.hasProfilePhoto ? `/api/users/${currentUser.id}/photo` : undefined}
+                  src={currentUser?.hasProfilePhoto ? `http://localhost:5000/api/users/${currentUser.id}/photo` : undefined}
                 >
                   {currentUser?.fullName?.charAt(0)}
                 </Avatar>

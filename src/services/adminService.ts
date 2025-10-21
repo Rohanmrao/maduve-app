@@ -4,8 +4,7 @@ import {
   LoginRequest,
   LoginResponse,
   UserRequest,
-  AuthLevelResponse,
-  DashboardResponse
+  AuthLevelResponse
 } from '../types';
 
 export const adminService = {
@@ -17,8 +16,8 @@ export const adminService = {
     return apiService.post<Admin>('/admin/signup', data);
   },
 
-  async getDashboard(): Promise<DashboardResponse> {
-    return apiService.get<DashboardResponse>('/admin/dashboard');
+  async getDashboard(): Promise<string[]> {
+    return apiService.get<string[]>('/admin/dashboard');
   },
 
   async getPendingRequests(): Promise<UserRequest[]> {
@@ -30,11 +29,11 @@ export const adminService = {
   },
 
   async approveRequest(requestId: string, adminId: string): Promise<{ id: string; status: string; message: string }> {
-    return apiService.post<{ id: string; status: string; message: string }>(`/admin/requests/${requestId}/approve`, { adminId });
+    return apiService.postRawString<{ id: string; status: string; message: string }>(`/admin/requests/${requestId}/approve`, adminId);
   },
 
   async rejectRequest(requestId: string, adminId: string): Promise<{ id: string; status: string; message: string }> {
-    return apiService.post<{ id: string; status: string; message: string }>(`/admin/requests/${requestId}/reject`, { adminId });
+    return apiService.postRawString<{ id: string; status: string; message: string }>(`/admin/requests/${requestId}/reject`, adminId);
   },
 
   async getAdminByEmail(email: string): Promise<Admin> {

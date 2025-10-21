@@ -17,10 +17,30 @@ class ApiService {
   }
 
   private setupInterceptors() {
+    this.api.interceptors.request.use(
+      (config) => {
+        console.log('API Request:', {
+          method: config.method,
+          url: config.url,
+          data: config.data,
+          headers: config.headers
+        });
+        return config;
+      },
+      (error) => {
+        console.error('Request Error:', error);
+        return Promise.reject(error);
+      }
+    );
+
     this.api.interceptors.response.use(
       (response) => response,
       (error) => {
         console.error('API Error:', error);
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+        }
         return Promise.reject(error);
       }
     );
@@ -33,6 +53,15 @@ class ApiService {
 
   async post<T>(url: string, data?: any): Promise<T> {
     const response: AxiosResponse<T> = await this.api.post(url, data);
+    return response.data;
+  }
+
+  async postRawString<T>(url: string, value: string): Promise<T> {
+    const response: AxiosResponse<T> = await this.api.post(url, JSON.stringify(value), {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     return response.data;
   }
 

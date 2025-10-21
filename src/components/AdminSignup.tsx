@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { adminService } from '../services';
+import { Breadcrumbs } from './Breadcrumbs';
 
 export const AdminSignup: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -63,15 +64,14 @@ export const AdminSignup: React.FC = () => {
   return (
     <Box
       sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
         minHeight: '100vh',
         bgcolor: 'grey.100',
         py: 4
       }}
     >
-      <Card sx={{ maxWidth: 500, width: '100%', mx: 2 }}>
+      <Container maxWidth="sm">
+        <Breadcrumbs items={[{ label: 'Admin Sign Up' }]} />
+        <Card sx={{ width: '100%' }}>
         <CardContent>
           <Typography variant="h4" align="center" gutterBottom>
             Create Admin Account
@@ -162,6 +162,7 @@ export const AdminSignup: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
+      </Container>
     </Box>
   );
 };
