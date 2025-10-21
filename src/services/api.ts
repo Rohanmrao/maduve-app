@@ -97,7 +97,7 @@ class ApiService {
       return `${API_BASE_URL}/users/${userId}/photo`;
     }
     const imageNumber = imageType.replace('image', '');
-    return `${API_BASE_URL}/profile-image/${userId}/image/${imageNumber}`;
+    return `${API_BASE_URL}/ProfileImage/${userId}/image/${imageNumber}`;
   }
 }
 

@@ -56,18 +56,18 @@ export const userService = {
   },
 
   async uploadProfileImage(userId: string, imageNumber: number, file: File): Promise<{ message: string; size: number }> {
-    return apiService.uploadFile<{ message: string; size: number }>(`/profile-image/${userId}/upload/${imageNumber}`, file);
+    return apiService.uploadFile<{ message: string; size: number }>(`/ProfileImage/${userId}/upload/${imageNumber}`, file);
   },
 
   async deleteProfileImage(userId: string, imageNumber: number): Promise<void> {
-    return apiService.delete<void>(`/profile-image/${userId}/image/${imageNumber}`);
+    return apiService.delete<void>(`/ProfileImage/${userId}/image/${imageNumber}`);
   },
 
   async getAvailableImageSlots(userId: string): Promise<{ availableSlots: number[] }> {
-    return apiService.get<{ availableSlots: number[] }>(`/profile-image/${userId}/available-slots`);
+    return apiService.get<{ availableSlots: number[] }>(`/ProfileImage/${userId}/available-slots`);
   },
 
   async getAllProfileImages(userId: string): Promise<{ userId: string; totalImages: number; images: Array<{ imageNumber: number; contentType: string; size: number; imageUrl: string }> }> {
-    return apiService.get<{ userId: string; totalImages: number; images: Array<{ imageNumber: number; contentType: string; size: number; imageUrl: string }> }>(`/profile-image/${userId}/all`);
+    return apiService.get<{ userId: string; totalImages: number; images: Array<{ imageNumber: number; contentType: string; size: number; imageUrl: string }> }>(`/ProfileImage/${userId}/all`);
   }
 };

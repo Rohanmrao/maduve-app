@@ -44,7 +44,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
   const queryClient = useQueryClient();
 
   const { data: profileImages, refetch: refetchImages } = useQuery({
-    queryKey: ['profile-images', user?.id],
+    queryKey: ['ProfileImages', user?.id],
     queryFn: () => userService.getAllProfileImages(user?.id || ''),
     enabled: !!user?.id && open,
     retry: false
@@ -235,11 +235,11 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
                     <input
                       accept="image/*"
                       style={{ display: 'none' }}
-                      id={`profile-image-${imageNumber}`}
+                      id={`ProfileImage-${imageNumber}`}
                       type="file"
                       onChange={(e) => handleProfileImageUpload(e, imageNumber)}
                     />
-                    <label htmlFor={`profile-image-${imageNumber}`}>
+                    <label htmlFor={`ProfileImage-${imageNumber}`}>
                       <IconButton
                         color="primary"
                         aria-label={`upload image ${imageNumber}`}

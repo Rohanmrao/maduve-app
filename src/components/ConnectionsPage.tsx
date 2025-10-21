@@ -36,7 +36,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { connectService } from '../services';
-import { ConnectRequestStatusLabels } from '../types';
+import { ConnectRequesttatusLabels } from '../types';
 import { Breadcrumbs } from './Breadcrumbs';
 
 export const ConnectionsPage: React.FC = () => {
@@ -194,7 +194,7 @@ export const ConnectionsPage: React.FC = () => {
                             </TableCell>
                             <TableCell>
                               <Chip 
-                                label={ConnectRequestStatusLabels[request.status]} 
+                                label={ConnectRequesttatusLabels[request.status]} 
                                 color={request.status === 0 ? 'warning' : request.status === 1 ? 'success' : 'error'}
                                 size="small"
                               />
@@ -272,7 +272,7 @@ export const ConnectionsPage: React.FC = () => {
                             </TableCell>
                             <TableCell>
                               <Chip 
-                                label={ConnectRequestStatusLabels[request.status]} 
+                                label={ConnectRequesttatusLabels[request.status]} 
                                 color={request.status === 0 ? 'warning' : request.status === 1 ? 'success' : 'error'}
                                 size="small"
                               />

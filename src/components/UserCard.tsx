@@ -42,7 +42,7 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onSelect, expanded = f
   });
 
   const { data: profileImages } = useQuery({
-    queryKey: ['profile-images', user.id],
+    queryKey: ['ProfileImages', user.id],
     queryFn: () => userService.getAllProfileImages(user.id),
     enabled: expanded,
     retry: false
@@ -58,7 +58,7 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onSelect, expanded = f
       setConnectDialogOpen(false);
       setMessage('');
       setError('');
-      queryClient.invalidateQueries({ queryKey: ['connect-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['ConnectRequest'] });
     },
     onError: (err: any) => {
       setError(err.response?.data?.message || 'Failed to send connect request');

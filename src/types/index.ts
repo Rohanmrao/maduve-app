@@ -45,7 +45,7 @@ export interface ConnectRequest {
   senderName: string;
   receiverName: string;
   message: string;
-  status: ConnectRequestStatus;
+  status: ConnectRequesttatus;
   createdAt: string;
 }
 
@@ -126,7 +126,7 @@ export enum UserStatus {
   InTalks = 4
 }
 
-export enum ConnectRequestStatus {
+export enum ConnectRequesttatus {
   Pending = 0,
   Accepted = 1,
   Rejected = 2
@@ -140,8 +140,8 @@ export const UserStatusLabels: Record<UserStatus, string> = {
   [UserStatus.InTalks]: 'In Talks'
 };
 
-export const ConnectRequestStatusLabels: Record<ConnectRequestStatus, string> = {
-  [ConnectRequestStatus.Pending]: 'Pending',
-  [ConnectRequestStatus.Accepted]: 'Accepted',
-  [ConnectRequestStatus.Rejected]: 'Rejected'
+export const ConnectRequesttatusLabels: Record<ConnectRequesttatus, string> = {
+  [ConnectRequesttatus.Pending]: 'Pending',
+  [ConnectRequesttatus.Accepted]: 'Accepted',
+  [ConnectRequesttatus.Rejected]: 'Rejected'
 };

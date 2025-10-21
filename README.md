@@ -91,10 +91,10 @@ The frontend integrates with the ASP.NET Core backend API with the following end
 - `POST /api/admin/requests/{id}/reject` - Reject user request
 
 ### Connection Requests
-- `POST /api/connect-requests/sender/{id}/send` - Send connection request
-- `POST /api/connect-requests/receiver/{id}/accept/{senderId}` - Accept request
-- `POST /api/connect-requests/receiver/{id}/reject/{senderId}` - Reject request
-- `GET /api/connect-requests/receiver/{id}/pending` - Get pending requests
+- `POST /api/ConnectRequest/sender/{id}/send` - Send connection request
+- `POST /api/ConnectRequest/receiver/{id}/accept/{senderId}` - Accept request
+- `POST /api/ConnectRequest/receiver/{id}/reject/{senderId}` - Reject request
+- `GET /api/ConnectRequest/receiver/{id}/pending` - Get pending requests
 
 ## Key Components
 
