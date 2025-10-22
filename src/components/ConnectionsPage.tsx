@@ -73,7 +73,7 @@ export const ConnectionsPage: React.FC = () => {
     enabled: !!selectedSenderId
   });
 
-  const { data: senderProfileImages } = useQuery({
+  const { data: senderProfileImages, isLoading: loadingProfileImages } = useQuery({
     queryKey: ['sender-profile-images', selectedSenderId],
     queryFn: () => userService.getAllProfileImages(selectedSenderId || ''),
     enabled: !!selectedSenderId
@@ -417,17 +417,24 @@ export const ConnectionsPage: React.FC = () => {
               )}
 
               {/* Profile Images */}
-              {(() => {
-                const allImages = [
-                  senderProfile.hasProfilePhoto ? `http://localhost:5000/api/users/${senderProfile.id}/photo` : null,
-                  ...(senderProfileImages?.images.map(img => `http://localhost:5000${img.imageUrl.replace('/profile-image/', '/ProfileImage/')}`) || [])
-                ].filter(Boolean) as string[];
-
-                return allImages.length > 0 && (
-                  <Box sx={{ mt: 3 }}>
-                    <Typography variant="h6" gutterBottom>
-                      Photos
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Photos
+                </Typography>
+                {loadingProfileImages ? (
+                  <Box display="flex" justifyContent="center" p={2}>
+                    <CircularProgress size={24} />
+                    <Typography variant="body2" sx={{ ml: 1 }}>
+                      Loading photos...
                     </Typography>
+                  </Box>
+                ) : (() => {
+                  const allImages = [
+                    senderProfile.hasProfilePhoto ? `http://localhost:5000/api/users/${senderProfile.id}/photo` : null,
+                    ...(senderProfileImages?.images?.map((img: any) => img.imageUrl) || [])
+                  ].filter(Boolean) as string[];
+
+                  return allImages.length > 0 ? (
                     <ImageList cols={3} gap={8}>
                       {allImages.map((imageUrl, index) => (
                         <ImageListItem key={index}>
@@ -436,13 +443,20 @@ export const ConnectionsPage: React.FC = () => {
                             alt={`${senderProfile.fullName} - ${index + 1}`}
                             loading="lazy"
                             style={{ height: 200, objectFit: 'cover' }}
+                            onError={(e) => {
+                              console.error('Image load error:', imageUrl, e);
+                            }}
                           />
                         </ImageListItem>
                       ))}
                     </ImageList>
-                  </Box>
-                );
-              })()}
+                  ) : (
+                    <Typography variant="body2" color="textSecondary" align="center" sx={{ py: 2 }}>
+                      No photos available for this user.
+                    </Typography>
+                  );
+                })()}
+              </Box>
             </Box>
           ) : (
             <Typography color="error">Failed to load profile</Typography>
