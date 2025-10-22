@@ -1,7 +1,6 @@
 import { apiService } from './api';
 import {
   User,
-  UserRequest,
   LoginRequest,
   LoginResponse,
   SignupRequest,
@@ -56,7 +55,7 @@ export const userService = {
   },
 
   async uploadProfileImage(userId: string, imageNumber: number, file: File): Promise<{ message: string; size: number }> {
-    return apiService.uploadFile<{ message: string; size: number }>(`/ProfileImage/${userId}/upload/${imageNumber}`, file);
+    return apiService.uploadProfileImage<{ message: string; size: number }>(`/ProfileImage/${userId}/upload/${imageNumber}`, file, userId, imageNumber);
   },
 
   async deleteProfileImage(userId: string, imageNumber: number): Promise<void> {

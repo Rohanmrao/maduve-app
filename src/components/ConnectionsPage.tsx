@@ -23,19 +23,25 @@ import {
   Chip,
   Avatar,
   CircularProgress,
-  Alert
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
   AccountCircle,
   Logout,
   CheckCircle,
   Cancel,
-  ArrowBack
+  ArrowBack,
+  Visibility
 } from '@mui/icons-material';
+import { ImageList, ImageListItem } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { connectService } from '../services';
+import { connectService, userService } from '../services';
 import { ConnectRequesttatusLabels } from '../types';
 import { Breadcrumbs } from './Breadcrumbs';
 
@@ -44,6 +50,8 @@ export const ConnectionsPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [error, setError] = useState('');
+  const [selectedSenderId, setSelectedSenderId] = useState<string | null>(null);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -59,11 +67,24 @@ export const ConnectionsPage: React.FC = () => {
     enabled: !!user?.id
   });
 
+  const { data: senderProfile, isLoading: loadingProfile } = useQuery({
+    queryKey: ['sender-profile', selectedSenderId],
+    queryFn: () => userService.getUserById(selectedSenderId || ''),
+    enabled: !!selectedSenderId
+  });
+
+  const { data: senderProfileImages } = useQuery({
+    queryKey: ['sender-profile-images', selectedSenderId],
+    queryFn: () => userService.getAllProfileImages(selectedSenderId || ''),
+    enabled: !!selectedSenderId
+  });
+
   const acceptMutation = useMutation({
     mutationFn: (senderId: string) => connectService.acceptConnectRequest(user?.id || '', senderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['received-requests'] });
       queryClient.invalidateQueries({ queryKey: ['sent-requests'] });
+      setError(''); // Clear any previous errors
     },
     onError: (err: any) => {
       setError(err.response?.data?.error || 'Failed to accept request');
@@ -75,6 +96,7 @@ export const ConnectionsPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['received-requests'] });
       queryClient.invalidateQueries({ queryKey: ['sent-requests'] });
+      setError(''); // Clear any previous errors
     },
     onError: (err: any) => {
       setError(err.response?.data?.error || 'Failed to reject request');
@@ -105,6 +127,16 @@ export const ConnectionsPage: React.FC = () => {
 
   const handleReject = (senderId: string) => {
     rejectMutation.mutate(senderId);
+  };
+
+  const handleViewProfile = (senderId: string) => {
+    setSelectedSenderId(senderId);
+    setProfileDialogOpen(true);
+  };
+
+  const handleCloseProfileDialog = () => {
+    setProfileDialogOpen(false);
+    setSelectedSenderId(null);
   };
 
   return (
@@ -166,8 +198,8 @@ export const ConnectionsPage: React.FC = () => {
                     No received connection requests.
                   </Typography>
                 ) : (
-                  <TableContainer component={Paper}>
-                    <Table>
+                  <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
+                    <Table sx={{ minWidth: 650 }}>
                       <TableHead>
                         <TableRow>
                           <TableCell>From</TableCell>
@@ -200,30 +232,47 @@ export const ConnectionsPage: React.FC = () => {
                               />
                             </TableCell>
                             <TableCell>
-                              {request.status === 0 && (
-                                <Box display="flex" gap={1}>
-                                  <Button
-                                    size="small"
-                                    variant="contained"
-                                    color="success"
-                                    startIcon={<CheckCircle />}
-                                    onClick={() => handleAccept(request.senderId)}
-                                    disabled={acceptMutation.isPending || rejectMutation.isPending}
-                                  >
-                                    Accept
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    variant="outlined"
-                                    color="error"
-                                    startIcon={<Cancel />}
-                                    onClick={() => handleReject(request.senderId)}
-                                    disabled={acceptMutation.isPending || rejectMutation.isPending}
-                                  >
-                                    Reject
-                                  </Button>
-                                </Box>
-                              )}
+                              <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  startIcon={<Visibility />}
+                                  onClick={() => handleViewProfile(request.senderId)}
+                                  sx={{ minWidth: 'auto' }}
+                                >
+                                  View Profile
+                                </Button>
+                                {request.status === 0 ? (
+                                  <>
+                                    <Button
+                                      size="small"
+                                      variant="contained"
+                                      color="success"
+                                      startIcon={<CheckCircle />}
+                                      onClick={() => handleAccept(request.senderId)}
+                                      disabled={acceptMutation.isPending || rejectMutation.isPending}
+                                      sx={{ minWidth: '80px' }}
+                                    >
+                                      Accept
+                                    </Button>
+                                    <Button
+                                      size="small"
+                                      variant="outlined"
+                                      color="error"
+                                      startIcon={<Cancel />}
+                                      onClick={() => handleReject(request.senderId)}
+                                      disabled={acceptMutation.isPending || rejectMutation.isPending}
+                                      sx={{ minWidth: '80px' }}
+                                    >
+                                      Reject
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <Typography variant="body2" color="textSecondary">
+                                    {request.status === 1 ? 'Accepted' : 'Rejected'}
+                                  </Typography>
+                                )}
+                              </Box>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -288,7 +337,121 @@ export const ConnectionsPage: React.FC = () => {
           </CardContent>
         </Card>
       </Container>
+
+      {/* Profile View Dialog */}
+      <Dialog
+        open={profileDialogOpen}
+        onClose={handleCloseProfileDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {senderProfile ? `${senderProfile.fullName}'s Profile` : 'Loading Profile...'}
+        </DialogTitle>
+        <DialogContent>
+          {loadingProfile ? (
+            <Box display="flex" justifyContent="center" p={4}>
+              <CircularProgress />
+            </Box>
+          ) : senderProfile ? (
+            <Box>
+              <Box display="flex" alignItems="center" mb={3}>
+                <Avatar
+                  sx={{ width: 80, height: 80, mr: 3 }}
+                  src={senderProfile.hasProfilePhoto ? `http://localhost:5000/api/users/${senderProfile.id}/photo` : undefined}
+                >
+                  {senderProfile.fullName.charAt(0)}
+                </Avatar>
+                <Box>
+                  <Typography variant="h5" gutterBottom>
+                    {senderProfile.fullName}
+                  </Typography>
+                  <Chip 
+                    label={senderProfile.status === 1 ? 'Active' : 'Inactive'} 
+                    color={senderProfile.status === 1 ? 'success' : 'warning'}
+                    size="small"
+                  />
+                </Box>
+              </Box>
+
+              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2, mb: 3 }}>
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Email
+                  </Typography>
+                  <Typography variant="body1">{senderProfile.email}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Phone
+                  </Typography>
+                  <Typography variant="body1">{senderProfile.phone}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Ecclesia
+                  </Typography>
+                  <Typography variant="body1">{senderProfile.ecclesia}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Language
+                  </Typography>
+                  <Typography variant="body1">{senderProfile.language}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Education
+                  </Typography>
+                  <Typography variant="body1">{senderProfile.education}</Typography>
+                </Box>
+              </Box>
+
+              {senderProfile.bio && (
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Bio
+                  </Typography>
+                  <Typography variant="body1">{senderProfile.bio}</Typography>
+                </Box>
+              )}
+
+              {/* Profile Images */}
+              {(() => {
+                const allImages = [
+                  senderProfile.hasProfilePhoto ? `http://localhost:5000/api/users/${senderProfile.id}/photo` : null,
+                  ...(senderProfileImages?.images.map(img => `http://localhost:5000${img.imageUrl.replace('/profile-image/', '/ProfileImage/')}`) || [])
+                ].filter(Boolean) as string[];
+
+                return allImages.length > 0 && (
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                      Photos
+                    </Typography>
+                    <ImageList cols={3} gap={8}>
+                      {allImages.map((imageUrl, index) => (
+                        <ImageListItem key={index}>
+                          <img
+                            src={imageUrl}
+                            alt={`${senderProfile.fullName} - ${index + 1}`}
+                            loading="lazy"
+                            style={{ height: 200, objectFit: 'cover' }}
+                          />
+                        </ImageListItem>
+                      ))}
+                    </ImageList>
+                  </Box>
+                );
+              })()}
+            </Box>
+          ) : (
+            <Typography color="error">Failed to load profile</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseProfileDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
-

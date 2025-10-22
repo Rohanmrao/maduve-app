@@ -92,6 +92,20 @@ class ApiService {
     return response.data;
   }
 
+  async uploadProfileImage<T>(url: string, file: File, userId: string, imageNumber: number): Promise<T> {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('userId', userId);
+    formData.append('imageNumber', imageNumber.toString());
+    
+    const response: AxiosResponse<T> = await this.api.post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
   getImageUrl(userId: string, imageType: 'photo' | 'image1' | 'image2' | 'image3'): string {
     if (imageType === 'photo') {
       return `${API_BASE_URL}/users/${userId}/photo`;

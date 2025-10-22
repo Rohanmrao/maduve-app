@@ -32,6 +32,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
   const { updateUser } = useAuth();
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
+    email: user?.email || '',
     phone: user?.phone || '',
     ecclesia: user?.ecclesia || '',
     language: user?.language || '',
@@ -39,6 +40,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
     bio: user?.bio || ''
   });
   const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const queryClient = useQueryClient();
@@ -50,8 +52,35 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
     retry: false
   });
 
+  // Update form data when user prop changes
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        fullName: user.fullName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        ecclesia: user.ecclesia || '',
+        language: user.language || '',
+        education: user.education || '',
+        bio: user.bio || ''
+      });
+    }
+  }, [user]);
+
   const updateMutation = useMutation({
-    mutationFn: () => userService.updateUser(user?.id || '', formData),
+    mutationFn: () => {
+      // Ensure all fields are included in the request
+      const updateData = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        ecclesia: formData.ecclesia,
+        language: formData.language,
+        education: formData.education,
+        bio: formData.bio
+      };
+      return userService.updateUser(user?.id || '', updateData);
+    },
     onSuccess: (updatedUser) => {
       updateUser(updatedUser);
       setSuccess('Profile updated successfully');
@@ -75,6 +104,34 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.fullName.trim()) {
+      setError('Full name is required');
+      return;
+    }
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      return;
+    }
+    if (!formData.phone.trim()) {
+      setError('Phone is required');
+      return;
+    }
+    if (!formData.ecclesia.trim()) {
+      setError('Ecclesia is required');
+      return;
+    }
+    if (!formData.language.trim()) {
+      setError('Language is required');
+      return;
+    }
+    if (!formData.education.trim()) {
+      setError('Education is required');
+      return;
+    }
+    
+    setError(''); // Clear any previous errors
     updateMutation.mutate();
   };
 
@@ -100,13 +157,21 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
 
     try {
       setLoading(true);
+      setImageLoading(true);
       await userService.uploadProfileImage(user.id, imageNumber, file);
       queryClient.invalidateQueries({ queryKey: ['user', user.id] });
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      refetchImages();
-      setSuccess(`Profile image ${imageNumber} uploaded successfully`);
+      setSuccess(`Profile image ${imageNumber} uploaded successfully. Processing image...`);
+      
+      // Wait 3 seconds before refetching images to prevent backend overload
+      setTimeout(() => {
+        refetchImages();
+        setImageLoading(false);
+        setSuccess(`Profile image ${imageNumber} uploaded and processed successfully`);
+      }, 3000);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to upload image');
+      setImageLoading(false);
     } finally {
       setLoading(false);
     }
@@ -131,7 +196,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
 
   const getImageUrl = (imageNumber: number): string | undefined => {
     const image = profileImages?.images.find(img => img.imageNumber === imageNumber);
-    return image ? `http://localhost:5000${image.imageUrl}` : undefined;
+    return image ? `http://localhost:5000${image.imageUrl.replace('/profile-image/', '/ProfileImage/')}` : undefined;
   };
 
   const hasImage = (imageNumber: number): boolean => {
@@ -200,19 +265,33 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
               <Card key={imageNumber}>
                 {hasImage(imageNumber) ? (
                   <>
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={getImageUrl(imageNumber)}
-                      alt={`Profile image ${imageNumber}`}
-                    />
+                    {imageLoading ? (
+                      <Box
+                        sx={{
+                          height: 200,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'grey.100'
+                        }}
+                      >
+                        <CircularProgress />
+                      </Box>
+                    ) : (
+                      <CardMedia
+                        component="img"
+                        height="200"
+                        image={getImageUrl(imageNumber)}
+                        alt={`Profile image ${imageNumber}`}
+                      />
+                    )}
                     <CardActions>
                       <Button
                         size="small"
                         color="error"
                         startIcon={<Delete />}
                         onClick={() => handleDeleteProfileImage(imageNumber)}
-                        disabled={loading}
+                        disabled={loading || imageLoading}
                       >
                         Delete
                       </Button>
@@ -244,7 +323,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
                         color="primary"
                         aria-label={`upload image ${imageNumber}`}
                         component="span"
-                        disabled={loading}
+                        disabled={loading || imageLoading}
                       >
                         <PhotoCamera />
                       </IconButton>
@@ -264,6 +343,19 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ open, onClose, user })
                 value={formData.fullName}
                 onChange={handleChange}
                 required
+              />
+            </Box>
+            <Box sx={{ gridColumn: '1 / -1' }}>
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                disabled
+                helperText="Email cannot be changed"
               />
             </Box>
             <TextField

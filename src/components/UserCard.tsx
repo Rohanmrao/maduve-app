@@ -81,7 +81,7 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onSelect, expanded = f
   if (expanded) {
     const allImages = [
       user.hasProfilePhoto ? `http://localhost:5000/api/users/${user.id}/photo` : null,
-      ...(profileImages?.images.map(img => `http://localhost:5000${img.imageUrl}`) || [])
+      ...(profileImages?.images.map(img => `http://localhost:5000${img.imageUrl.replace('/profile-image/', '/ProfileImage/')}`) || [])
     ].filter(Boolean) as string[];
 
     return (
